@@ -1,0 +1,137 @@
+defaults:
+
+  # Train Script
+  expert_datadir: None
+  bc_datadir:  None
+  logdir: None
+  seed: 0
+  task: metadrive_task
+  envs: 1
+  envs_parallel: none
+  render_size: [64, 64]
+  dmc_camera: -1
+  atari_grayscale: True
+  time_limit: 0
+  action_repeat: 1
+  steps: 1e8
+  policy_offline_steps: 1e4
+  model_offline_steps: 1e4
+  total_steps: 300000
+  setps_online: 5e5
+  log_every: 1e2
+  eval_every: 1e2
+  eval_every_offline: 1e2
+  eval_eps: 1
+  prefill: 10000
+  pretrain: 1
+  save_every: 1e4
+  train_every: 5
+  model_train_steps: 500
+  policy_train_steps: 1000
+  expl_until: 0
+  replay: {capacity: 2e6, ongoing: True, minlen: 50, maxlen: 50, prioritize_ends: True}
+  dataset: {batch: 64, length: 50}
+  log_keys_video: ['image']
+  log_keys_sum: '^$'
+  log_keys_mean: '^$'
+  log_keys_max: '^$'
+  precision: 16
+  jit: True
+
+  # Agent
+  dreamer_only: False
+  num_critics: 5
+  clip_rewards: tanh
+  expl_noise: 0.0
+  eval_noise: 0.0
+  eval_state_mean: False
+
+  # World Model
+  grad_heads: [decoder, reward, discount]
+  pred_discount: True
+  rssm_type: ensemble #other option is p2e
+  rssm: {ensemble: 1, hidden: 1024, deter: 1024, stoch: 32, discrete: 32, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  encoder: {mlp_keys: '.*', cnn_keys: '.*', act: elu, norm: none, cnn_depth: 48, cnn_kernels: [4, 4, 4, 4], mlp_layers: [400, 400, 400, 400]}
+  decoder: {mlp_keys: '.*', cnn_keys: '.*', act: elu, norm: none, cnn_depth: 48, cnn_kernels: [5, 5, 6, 6], mlp_layers: [400, 400, 400, 400]}
+  reward_head: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  discount_head: {layers: 4, units: 400, act: elu, norm: none, dist: binary}
+  loss_scales: {bc: 0.0, kl: 1.0, reward: 1.0, discount: 1.0, proprio: 1.0}
+  kl: {free: 0.0, forward: False, balance: 0.8, free_avg: True}
+  model_opt: {opt: adam, lr: 1e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+
+  # Actor Critic
+  actor: {layers: 4, units: 400, act: elu, norm: none, dist: auto, min_std: 0.1}
+  critic: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  actor_opt: {opt: adam, lr: 8e-5, eps: 1e-5, clip: 100, wd: 1e-6}
+  critic_opt: {opt: adam, lr: 2e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  discount: 0.99
+  discount_lambda: 0.95
+  imag_horizon: 15
+  actor_grad: auto
+  actor_grad_mix: 0.1
+  actor_ent: 2e-3
+  slow_target: True
+  slow_target_update: 100
+  slow_target_fraction: 1
+  slow_baseline: True
+  reward_norm: {momentum: 1.0, scale: 1.0, eps: 1e-8}
+
+  #Ensemble Dynamics
+#  rssm: {ensemble: 7, hidden: 1024, deter: 1024, stoch: 32, discrete: 32, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  P2E_head: {layers: 3, units: 400, act: elu, norm: none, dist: mse}
+  seperate_batch_training: True
+
+  # Exploration
+  expl_intr_scale: -2.5
+  expl_extr_scale: 1.0
+  bc_scale: 1.0
+  expl_opt: {opt: adam, lr: 3e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  expl_head: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  expl_reward_norm: {momentum: 1.0, scale: 1.0, eps: 1e-8}
+  disag_target: logit
+  disag_log: False
+  disag_models: 7
+  disag_offset: 1
+  disag_action_cond: True
+  expl_model_loss: kl
+
+
+vision:
+  # Model
+  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  clip_rewards: identity
+  pred_discount: False
+  grad_heads: [decoder, reward]
+  rssm: {ensemble: 7, hidden: 400, deter: 400}
+  kl.free: 1.0
+  
+  #Actor Critic
+  num_critics: 5
+  actor_ent: 0.0
+  loss_scales.bc: 10.0
+  bc_scale: 10.0
+  
+  # Optimization params
+  model_opt.lr: 3e-4
+  actor_opt.lr: 8e-5
+  critic_opt.lr: 8e-5
+  
+  # Dataset
+  replay: {capacity: 2e6, ongoing: True, minlen: 25, maxlen: 25, prioritize_ends: True}
+  dataset: {batch: 128, length: 25}
+  replay.prioritize_ends: False
+  
+  # Env
+  action_repeat: 1
+  time_limit: 300
+  
+  # Training params
+  policy_offline_steps: 10000
+  model_offline_steps: 10000
+  total_steps: 500000
+  model_train_steps: 50
+  policy_train_steps: 50
+  eval_every: 900
+  eval_every_offline: 500
+
